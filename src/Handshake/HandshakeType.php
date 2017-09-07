@@ -40,4 +40,3 @@ class HandshakeType
     const CLIENT_KEY_EXCHANGE = 16;
     const FINISHED            = 20;
 }
-

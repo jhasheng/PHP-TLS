@@ -16,9 +16,9 @@ class CipherSuites
     const TLS_RSA_WITH_AES_128_CBC_SHA       = 0x002F;
     const TLS_RSA_WITH_AES_256_CBC_SHA       = 0x0035;
     const TLS_RSA_WITH_AES_128_CBC_SHA256    = 0x003C;
-    const TLS_RSA_WITH_AES_256_CBC_SHA256    = 0x003D; 
+    const TLS_RSA_WITH_AES_256_CBC_SHA256    = 0x003D;
     const TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA = 0xC013;
-    const TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA = 0xC014;    
+    const TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA = 0xC014;
 
     private static $cipherList = [
 
@@ -40,7 +40,7 @@ class CipherSuites
         self::TLS_RSA_WITH_AES_256_CBC_SHA =>
         ['cipher_type' => self::CIPHER_TYPE_BLOCK, 'crypto_method' => 'AES-256-CBC', 'mac_len' => 20, 'iv_len' => 16, 'key_len' => 32, 'mac' => 'sha1'],
 
-        self::TLS_RSA_WITH_AES_128_CBC_SHA => 
+        self::TLS_RSA_WITH_AES_128_CBC_SHA =>
         ['cipher_type' => self::CIPHER_TYPE_BLOCK, 'crypto_method' => 'AES-128-CBC', 'mac_len' => 20, 'iv_len' => 16, 'key_len' => 16, 'mac' => 'sha1'],
 
         self::TLS_RSA_WITH_AES_128_CBC_SHA256 =>
@@ -90,8 +90,9 @@ class CipherSuites
     {
         $cipherID = $arr[0] << 8 | $arr[1];
 
-        if( !array_key_exists($cipherID, self::$cipherList) )
+        if (!array_key_exists($cipherID, self::$cipherList)) {
             throw new TLSAlertException(Alert::create(Alert::INTERNAL_ERROR), "Failed to initiate CipherSuite. cipherID: $cipherID");
+        }
 
         $cipherSuite = self::$cipherList[$cipherID];
 
@@ -112,8 +113,7 @@ class CipherSuites
 
     public static function isGCM($cipherID)
     {
-        switch($cipherID)
-        {
+        switch ($cipherID) {
             case self::TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256:
             case self::TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:
             case self::TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:
@@ -127,8 +127,7 @@ class CipherSuites
 
     public static function isECDHE($cipherID)
     {
-        switch($cipherID)
-        {
+        switch ($cipherID) {
             case self::TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256:
             case self::TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:
             case self::TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:
@@ -142,8 +141,7 @@ class CipherSuites
 
     public static function isECDSA($cipherID)
     {
-        switch($cipherID)
-        {
+        switch ($cipherID) {
             case self::TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256:
                 return true;
         }
@@ -160,8 +158,7 @@ class CipherSuites
 
         $servAUType = $core->getConfig('is_ecdsa') ? self::AU_TYPE_ECDSA : self::AU_TYPE_RSA;
        
-        foreach( $arr as $val)
-        {
+        foreach ($arr as $val) {
             list($cipher1, $cipher2) = $val;
 
             $cipherID = $cipher1 << 8 | $cipher2;
@@ -169,18 +166,19 @@ class CipherSuites
             $auType = self::isECDSA($cipherID) ? self::AU_TYPE_ECDSA : self::AU_TYPE_RSA;
 
             // Check for Authentication algorithm
-            if( $servAUType !== $auType )
+            if ($servAUType !== $auType) {
                 continue;
-
-            if( in_array($cipherID, self::$enabledCipherSuites ) )
-            {
-                // Check for ECDHE
-                if( self::isECDHE($cipherID) && true !== $extensions->call('Curve', 'isEnabled', false) )
-                    continue;
-                else 
-                    return [$cipher1, $cipher2];
             }
-        } 
+
+            if (in_array($cipherID, self::$enabledCipherSuites)) {
+                // Check for ECDHE
+                if (self::isECDHE($cipherID) && true !== $extensions->call('Curve', 'isEnabled', false)) {
+                    continue;
+                } else {
+                    return [$cipher1, $cipher2];
+                }
+            }
+        }
 
         return null;
     }
@@ -189,8 +187,7 @@ class CipherSuites
     {
         $data = '';
 
-        foreach(self::$enabledCipherSuites as $val)
-        {
+        foreach (self::$enabledCipherSuites as $val) {
             $data .= Core::_pack('C', $val >> 8) . Core::_pack('C', $val & 0x00ff);
         }
 
@@ -199,8 +196,9 @@ class CipherSuites
 
     private function getProperty($property)
     {
-        if( !property_exists($this, $property) )
+        if (!property_exists($this, $property)) {
             return;
+        }
 
         return $this->$property;
     }
@@ -227,8 +225,9 @@ class CipherSuites
      */
     public function getHashAlogV33()
     {
-        if( self::isGCM($this->cipherID) )
+        if (self::isGCM($this->cipherID)) {
             return $this->macAlgorithm;
+        }
 
         return 'sha256';
     }
@@ -267,7 +266,7 @@ class CipherSuites
 
     public function hashHmac($data, $secretMac, $binary = true)
     {
-        return hash_hmac($this->macAlgorithm, $data, $secretMac, $binary );
+        return hash_hmac($this->macAlgorithm, $data, $secretMac, $binary);
     }
 
     public function gcmEncrypt($payload, $sharedKey, $nonce, $aad)
@@ -291,12 +290,8 @@ class CipherSuites
         $outputs[] = 'MAC Algorithm: ' . $this->macAlgorithm;
 
         $r = "[CipherSuite]\n"
-           . implode("\n", $outputs);
+           . implode("\n", $outputs) . "\n";
 
         return $r;
     }
-
 }
-
-
-

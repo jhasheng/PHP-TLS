@@ -60,7 +60,7 @@ class Alert extends ProtocolAbstract
         $constants = array_flip($class->getConstants());
 
         return $constants[$value];
-    } 
+    }
 
     public function getDescCode()
     {
@@ -83,7 +83,7 @@ class Alert extends ProtocolAbstract
 
     public function decode()
     {
-        return Core::_pack('C', $this->level) 
+        return Core::_pack('C', $this->level)
              . Core::_pack('C', $this->descCode);
     }
 
@@ -95,10 +95,8 @@ class Alert extends ProtocolAbstract
         return $msg;
     }
 
-    public function debugInfo(){ $this->toString(); }
+    public function debugInfo()
+    {
+        $this->toString();
+    }
 }
-
-
-
-
-

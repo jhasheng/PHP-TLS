@@ -33,7 +33,7 @@ class SignatureAlgorithm extends ExtensionAbstract
 {
     const TYPE_DEFAULT_RSA = 0x0201; //sha1 rsa
 
-    const TYPE_SHA512_RSA = 0x0601;    
+    const TYPE_SHA512_RSA = 0x0601;
     const TYPE_SHA384_RSA = 0x0501;
     const TYPE_SHA256_RSA = 0x0401;
 
@@ -64,8 +64,7 @@ class SignatureAlgorithm extends ExtensionAbstract
         $this->core = $core;
         $this->algorithm = null;
 
-        if( $core->isServer )
-        {
+        if ($core->isServer) {
             // Set available signature algorithm
             $this->availSigAlgo = $core->getConfig('is_ecdsa')
                             ? self::TYPE_SIGNATURE_ECDSA : self::TYPE_SIGNATURE_RSA;
@@ -76,8 +75,9 @@ class SignatureAlgorithm extends ExtensionAbstract
     {
         $core = $this->core;
 
-        if( $type != TLSExtensions::TYPE_SIGNATURE_ALGORITHM )
-            return; 
+        if ($type != TLSExtensions::TYPE_SIGNATURE_ALGORITHM) {
+            return;
+        }
 
         $protoVersion = $core->getProtocolVersion();
 
@@ -87,21 +87,20 @@ class SignatureAlgorithm extends ExtensionAbstract
          * However, even if clients do offer it, the rules specified in [TLSEXT]
          * require servers to ignore extensions they do not understand.
          */
-        if( $protoVersion < 32 )
+        if ($protoVersion < 32) {
             return;
+        }
 
         $length = Core::_unpack('n', $data[0] . $data[1]);
         $data = substr($data, 2);
 
-        for( $i = 0; $i < $length; $i += 2 )
-        {
+        for ($i = 0; $i < $length; $i += 2) {
             $hash = Core::_unpack('C', $data[$i]);
             $sig  = Core::_unpack('C', $data[$i+1]);
 
             $algorithm = $hash << 8 | $sig;
 
-            if( in_array( $algorithm, self::$supportedAlgorithmList ) && $this->availSigAlgo == $sig )
-            {
+            if (in_array($algorithm, self::$supportedAlgorithmList) && $this->availSigAlgo == $sig) {
                 $this->algorithm = $algorithm;
                 break;
             }
@@ -112,12 +111,11 @@ class SignatureAlgorithm extends ExtensionAbstract
     {
         $sigData = '';
 
-        foreach(self::$supportedAlgorithmList as $algorithm)
-        {
+        foreach (self::$supportedAlgorithmList as $algorithm) {
             $sigData .= Core::_pack('C', $algorithm >> 8) . Core::_pack('C', $algorithm & 0x00ff);
         }
      
-        $sigData = Core::_pack('n', strlen($sigData) ) . $sigData;
+        $sigData = Core::_pack('n', strlen($sigData)) . $sigData;
 
         $this->extType = TLSExtensions::TYPE_SIGNATURE_ALGORITHM;
         $this->length  = strlen($sigData);
@@ -127,7 +125,9 @@ class SignatureAlgorithm extends ExtensionAbstract
         return $data;
     }
 
-    public function onDecodeServerHello(){}
+    public function onDecodeServerHello()
+    {
+    }
 
     public function getAlgorithm()
     {
@@ -150,8 +150,9 @@ class SignatureAlgorithm extends ExtensionAbstract
         $privateKey = $core->getConfig('private_key');
         $isECDSA = $core->getConfig('is_ecdsa');
 
-        if( $isECDSA )
+        if ($isECDSA) {
             $ecdsa = $core->getConfig('ecdsa');
+        }
 
         $protoVersion = $core->getProtocolVersion();
 
@@ -171,8 +172,7 @@ class SignatureAlgorithm extends ExtensionAbstract
          *       };
          * } Signature;
          */
-        if( $protoVersion < 32 )
-        {
+        if ($protoVersion < 32) {
             $this->getSignatureMD5Sha1($dataSign, $signature, $privateKey);
             return $signature;
         }
@@ -190,18 +190,17 @@ class SignatureAlgorithm extends ExtensionAbstract
          * -  If the negotiated key exchange algorithm is one of (ECDH_ECDSA,
          *    ECDHE_ECDSA), behave as if the client had sent value {sha1,ecdsa}.
          */
-        if( is_null( $this->algorithm ) )
-        {
-            if( $isECDSA )
+        if (is_null($this->algorithm)) {
+            if ($isECDSA) {
                 $signature = $ecdsa->getSignature($dataSign, 'sha1');
-            else
+            } else {
                 openssl_sign($dataSign, $signature, $privateKey, OPENSSL_ALGO_SHA1);
+            }
 
             return $signature;
         }
 
-        switch( $this->algorithm )
-        {
+        switch ($this->algorithm) {
             case self::TYPE_SHA512_RSA:
                 openssl_sign($dataSign, $signature, $privateKey, OPENSSL_ALGO_SHA512);
                 break;
@@ -226,9 +225,3 @@ class SignatureAlgorithm extends ExtensionAbstract
         return $signature;
     }
 }
-
-
-
-
-
-

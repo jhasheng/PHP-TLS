@@ -14,21 +14,21 @@ class EcDSA
     private $adapter;
     private $pemSerializer;
     private $gen;
-    private $privateKey;    
+    private $privateKey;
 
     public static function isValidPrivateKey($privateKeyPem)
     {
-        return is_string($privateKeyPem) && 
-                   strpos($privateKeyPem, "-----BEGIN EC PRIVATE KEY-----") !== false 
+        return is_string($privateKeyPem) &&
+                   strpos($privateKeyPem, "-----BEGIN EC PRIVATE KEY-----") !== false
                ? true : false;
     }
 
-    function __construct($privateKeyPem)
+    public function __construct($privateKeyPem)
     {
         $this->adapter = EccFactory::getAdapter();
         $this->pemSerializer = new PemPrivateKeySerializer(new DerPrivateKeySerializer($this->adapter));
         $this->privateKey = $this->pemSerializer->parse($privateKeyPem);
-        $this->gen = $this->privateKey->getPoint();         
+        $this->gen = $this->privateKey->getPoint();
     }
 
     public function getPrivateKey()
@@ -60,6 +60,4 @@ class EcDSA
 
         return $serializedSig;
     }
-
 }
-
