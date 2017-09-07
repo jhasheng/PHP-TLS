@@ -20,7 +20,7 @@ $hostname = "www.baidu.com";
 $httpRequest = "GET / HTTP/1.0\r\nHost: $hostname\r\n\r\n";
 
 // Connecting to www.google.com port 443(https)
-$socket = stream_socket_client("tcp://$hostname:443");
+$socket = stream_socket_client("tcp://$hostname:10443");
 
 // Non-blocking mode
 stream_set_blocking($socket, 0);

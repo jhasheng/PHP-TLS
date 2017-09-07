@@ -41,8 +41,12 @@ class Config
 
         $keyPairFiles = $arrConfig['key_pair_files'];
 
-        if (!isset($keyPairFiles['cert']) || !isset($keyPairFiles['key'])) {
-            throw new TLSException("Invalid keyPair");
+        if (!isset($keyPairFiles['cert']) || !file_exists($keyPairFiles['cert'][0])) {
+            throw new TLSException("Invalid cert path of keyPair");
+        }
+
+        if (!isset($keyPairFiles['key']) || !file_exists($keyPairFiles['key'][0])) {
+            throw new TLSException("Invalid key path of keyPair");
         }
 
         $pemCrtFiles     = $keyPairFiles['cert'];

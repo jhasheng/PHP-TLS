@@ -34,15 +34,15 @@ use PTLS\Exceptions\TLSAlertException;
 // TLS Config
 $config = TLSContext::getServerConfig([
     'key_pair_files' => [
-       'cert' => ['pem/ecdsa_crt.pem'], // RSA => pem/crt.pem
-       'key'  => ['pem/ecdsa_key.pem', 'test'] // RSA => pem/key.pem
-    ]
+        'cert' => [ __DIR__ . '/pem/ecdsa_crt.pem'],    // RSA => pem/crt.pem
+        'key'  => [ __DIR__ . '/pem/ecdsa_key.pem', 'test'] // RSA => pem/key.pem
+     ]
 ]);
 
 $tlsClients = [];
 
 // Create a tcp server socket
-$server = stream_socket_server("tcp://0.0.0.0:443", $errno, $errstr);
+$server = stream_socket_server("tcp://0.0.0.0:10443", $errno, $errstr);
 
 // Non-blocking mode
 stream_set_blocking($server, 0);

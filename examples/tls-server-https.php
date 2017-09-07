@@ -21,8 +21,8 @@ $config = TLSContext::getServerConfig([
 // ECDSA
 $config = TLSContext::getServerConfig([
     'key_pair_files' => [
-       'cert' => ['pem/ecdsa_crt.pem'],
-       'key'  => ['pem/ecdsa_key.pem', '']
+       'cert' => [ __DIR__ . '/pem/ecdsa_crt.pem'],
+       'key'  => [ __DIR__ . '/pem/ecdsa_key.pem', '']
     ]
 ]);
 
@@ -30,7 +30,7 @@ $config = TLSContext::getServerConfig([
 $tlsClients = [];
 
 // Create a tcp server socket
-$server = stream_socket_server("tcp://0.0.0.0:443", $errno, $errstr);
+$server = stream_socket_server("tcp://0.0.0.0:10443", $errno, $errstr);
 
 // Non-blocking mode
 stream_set_blocking($server, 0);
@@ -109,7 +109,7 @@ while (1) {
 
                     $in = $tls->input();
 
-                    $content = file_get_contents('html/index.html');
+                    $content = file_get_contents( __DIR__ . '/html/index.html');
 
                     $response = "HTTP/2.0 200 OK\r\nContent-Length: " . strlen($content) . "\r\n\r\n"
                               . $content;

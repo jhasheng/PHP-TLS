@@ -12,7 +12,7 @@ class ServerHello extends HandshakeAbstract
     /**
      * For Debug
      */
-    private $requestedExtensions;
+    private $requestedExtensions = [];
 
     public function __construct(Core $core)
     {
@@ -66,7 +66,6 @@ class ServerHello extends HandshakeAbstract
 
         $extLength = Core::_unpack('n', $data[3] . $data[4]);
         $data = substr($data, 5, $extLength);
-
         $this->requestedExtensions = $extensions = $this->encodeExtensions($data);
 
         $core->extensions->onEncodeServerHello($extensions);
